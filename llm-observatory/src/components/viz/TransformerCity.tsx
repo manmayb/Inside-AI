@@ -1,0 +1,214 @@
+"use client";
+
+import { memo, useMemo } from "react";
+import { motion } from "framer-motion";
+import { usePipelineStore } from "@/store/pipelineStore";
+import { NEURAL_TIMING } from "@/motion/neuralMotion";
+
+const VISIBLE = 18;
+
+function TransformerCityInner() {
+  const config = usePipelineStore((s) => s.config);
+  const stageProgress = usePipelineStore((s) => s.stageProgress);
+  const tokens = usePipelineStore((s) => s.tokens);
+  const selectedTokenIndex = usePipelineStore((s) => s.selectedTokenIndex);
+  const inspectedLayer = usePipelineStore((s) => s.inspectedLayer);
+
+  const activeLayer = Math.floor((stageProgress / 100) * (VISIBLE - 1));
+  const focusLayer = Math.min(
+    VISIBLE - 1,
+    Math.floor((inspectedLayer / Math.max(config.layers, 1)) * (VISIBLE - 1))
+  );
+
+  const towers = useMemo(
+    () =>
+      Array.from({ length: VISIBLE }, (_, i) => ({
+        layer: i,
+        height: 80 + (i / VISIBLE) * 120 + (i % 4) * 18,
+        offset: Math.sin(i * 0.7) * 12,
+        width: 14 + (i % 3) * 4,
+      })),
+    []
+  );
+
+  return (
+    <div className="relative h-[min(72vh,640px)] min-h-[480px] overflow-hidden">
+      {/* Deep-space floor grid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 50% 100%, var(--accent-glow), transparent 65%)",
+        }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-[55%] opacity-40"
+        style={{
+          backgroundImage:
+            "linear-gradient(var(--accent-glow) 1px, transparent 1px), linear-gradient(90deg, var(--accent-glow) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+          transform: "perspective(400px) rotateX(72deg)",
+          transformOrigin: "center bottom",
+          maskImage: "linear-gradient(to top, black 20%, transparent 90%)",
+        }}
+      />
+
+      {/* Attention highways — vertical beams */}
+      {towers.map((t) => (
+        <motion.div
+          key={`beam-${t.layer}`}
+          className="absolute bottom-[18%] w-px bg-gradient-to-t from-transparent via-[var(--accent)] to-transparent"
+          style={{
+            left: `${50 + (t.layer - VISIBLE / 2) * 3.2}%`,
+            height: `${t.height * 1.4}px`,
+            opacity: t.layer <= activeLayer ? 0.35 : 0.08,
+          }}
+          animate={{
+            opacity: t.layer === activeLayer ? [0.2, 0.7, 0.2] : t.layer <= activeLayer ? 0.25 : 0.06,
+          }}
+          transition={{
+            duration: NEURAL_TIMING.signalPulse,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+
+      <div className="relative flex h-full items-end justify-center gap-0.5 px-2 pb-20 pt-12">
+        {towers.map((t) => {
+          const isActive = t.layer === activeLayer;
+          const isFocus = t.layer === focusLayer;
+          const lit = t.layer <= activeLayer;
+
+          return (
+            <motion.div
+              key={t.layer}
+              className="relative flex flex-col items-center"
+              style={{ marginBottom: t.offset, zIndex: isActive ? 20 : t.layer }}
+              animate={{
+                scaleY: isActive ? 1.08 : isFocus ? 1.03 : 0.88,
+                opacity: lit ? 1 : 0.28,
+                y: isActive ? -6 : 0,
+              }}
+              transition={{ duration: 0.55, ease: [0.22, 0.68, 0.12, 1] }}
+            >
+              {/* Tower crown glow */}
+              {isActive && (
+                <motion.div
+                  className="absolute -top-6 h-8 w-16 rounded-full blur-xl"
+                  style={{ background: "var(--accent-beam)" }}
+                  animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.2, 0.9] }}
+                  transition={{ duration: NEURAL_TIMING.tensorFlow, repeat: Infinity }}
+                />
+              )}
+
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  width: t.width,
+                  height: t.height,
+                  clipPath:
+                    "polygon(8% 0, 92% 0, 100% 100%, 0 100%)",
+                  borderLeft: `1px solid ${isActive ? "var(--accent)" : "rgba(255,255,255,0.06)"}`,
+                  borderRight: `1px solid ${isActive ? "var(--accent)" : "rgba(255,255,255,0.06)"}`,
+                  boxShadow: isActive
+                    ? "0 0 60px var(--accent-glow), inset 0 0 30px var(--accent-glow)"
+                    : isFocus
+                      ? "0 0 30px rgba(124,58,237,0.25)"
+                      : undefined,
+                  background: isActive
+                    ? "linear-gradient(to top, rgba(0,0,0,0.9) 0%, var(--accent-glow) 40%, rgba(124,58,237,0.2) 100%)"
+                    : "linear-gradient(to top, rgba(0,0,0,0.85), rgba(124,58,237,0.12))",
+                }}
+              >
+                {/* Tensor stream upward */}
+                <motion.div
+                  className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--accent)] to-transparent opacity-50"
+                  animate={{ y: ["100%", "-20%"] }}
+                  transition={{
+                    duration: NEURAL_TIMING.tensorFlow,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+
+                {["MHSA", "FFN", "LN"].map((block, bi) => (
+                  <div
+                    key={block}
+                    className="absolute left-0 right-0 mx-0.5 text-center font-mono text-[6px] tracking-wider text-slate-500"
+                    style={{
+                      bottom: `${18 + bi * 24}%`,
+                      background: "rgba(0,0,0,0.5)",
+                      padding: "1px 0",
+                      borderTop: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    {block}
+                  </div>
+                ))}
+
+                {lit &&
+                  tokens.map((_, ti) => (
+                    <motion.div
+                      key={ti}
+                      className="absolute left-1/2 rounded-full"
+                      style={{
+                        width: ti === selectedTokenIndex ? 6 : 4,
+                        height: ti === selectedTokenIndex ? 6 : 4,
+                        marginLeft: ti === selectedTokenIndex ? -3 : -2,
+                        background: ti === selectedTokenIndex ? "#fff" : "var(--accent)",
+                        boxShadow:
+                          ti === selectedTokenIndex
+                            ? "0 0 16px #fff, 0 0 24px var(--accent)"
+                            : "0 0 10px var(--accent)",
+                      }}
+                      initial={{ bottom: "4%" }}
+                      animate={{
+                        bottom: [`${8 + (ti / Math.max(tokens.length, 1)) * 70}%`, "92%", "8%"],
+                      }}
+                      transition={{
+                        duration: NEURAL_TIMING.tensorFlow + ti * 0.15,
+                        repeat: Infinity,
+                        delay: ti * 0.1,
+                        ease: [0.45, 0.05, 0.15, 1],
+                      }}
+                    />
+                  ))}
+              </div>
+              <span
+                className="mt-2 font-mono text-[7px] tracking-widest"
+                style={{ color: isActive ? "var(--accent)" : "#475569" }}
+              >
+                L{t.layer + 1}
+              </span>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center">
+        <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[var(--accent)]">
+          Transformer megastructure
+        </p>
+        <p className="mt-1 font-mono text-[9px] text-[var(--muted)]">
+          {config.layers} layers · residual stream · d={config.hiddenDim}
+        </p>
+      </div>
+
+      <div className="absolute left-4 top-4 font-mono text-[9px] uppercase tracking-widest text-[var(--accent)]">
+        <motion.span
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: NEURAL_TIMING.signalPulse, repeat: Infinity }}
+        >
+          Signal L{activeLayer + 1}
+        </motion.span>
+      </div>
+
+      <div className="absolute right-4 top-4 max-w-[140px] text-right font-mono text-[8px] leading-relaxed text-[var(--muted)]">
+        Flying through artificial cognition
+      </div>
+    </div>
+  );
+}
+
+export const TransformerCity = memo(TransformerCityInner);
