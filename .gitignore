@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor / OS
+Thumbs.db
+
+# Accidental npm at repo root (app lives in llm-observatory/)
+/package-lock.json
+/node_modules/
