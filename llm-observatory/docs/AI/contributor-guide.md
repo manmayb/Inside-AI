@@ -1,77 +1,33 @@
-# AI / Cursor contributor guide
+# AI Contributor Guide
 
-For **AI coding assistants** and automation working in this repo.
-
----
-
-## Read first
-
-1. [../PRODUCT/vision.md](../PRODUCT/vision.md)  
-2. [../UX/philosophy.md](../UX/philosophy.md)  
-3. [../DECISIONS/001-scene-based-ux.md](../DECISIONS/001-scene-based-ux.md)  
-4. [../ARCHITECTURE/app-structure.md](../ARCHITECTURE/app-structure.md)  
+> **This file has been consolidated into [`../../AGENTS.md`](../../AGENTS.md).**
+>
+> `AGENTS.md` is the single source of truth for all agent operating rules, architecture
+> constraints, visual/theme requirements, UX limits, and documentation parity obligations.
+>
+> All AI assistants (Antigravity, Claude, Cursor, Copilot, Gemini) read `AGENTS.md`
+> automatically. You do not need to paste rules into the chat — they are always active.
 
 ---
 
-## Non-negotiable rules
+## Quick reference
 
-| Rule | Reason |
-|------|--------|
-| **Do not** remount dashboard shell (sidebar + always-on brain + scrubber) as default | ADR-001 |
-| **Do not** break Zustand single-store flow or `PIPELINE_STAGES` order without updating all docs | Pipeline contract |
-| **Do not** call real LLM APIs without explicit feature flag + docs | Product is simulated |
-| **Do not** expose tensors/logits/heatmaps in Beginner primary focal area | Progressive disclosure |
-| **Do** update `docs/` when changing flows, stages, or design tokens | Maintenance policy |
-| **Do** match Thought Museum tokens in `globals.css` | Visual consistency |
-
----
-
-## Architecture rules
-
-- **Presentation** changes go in `components/journey/`, `components/home/`, `sections/`, `viz/`.  
-- **Simulation** changes go in `src/lib/*` only — no React in lib.  
-- **Orchestration** in `hooks/usePipelineRunner.ts` — 50ms tick contract.  
-- **Prelude** is React local state in `ObservatoryApp` — not Zustand until `submitPrompt`.  
+| What you want to do | Where to look |
+|---------------------|---------------|
+| Operating rules & constraints | [`../../AGENTS.md`](../../AGENTS.md) |
+| Product vision | [`../PRODUCT/vision.md`](../PRODUCT/vision.md) |
+| UX philosophy | [`../UX/philosophy.md`](../UX/philosophy.md) |
+| Scene-based UX decision | [`../DECISIONS/001-scene-based-ux.md`](../DECISIONS/001-scene-based-ux.md) |
+| App structure | [`../ARCHITECTURE/app-structure.md`](../ARCHITECTURE/app-structure.md) |
+| Adding a stage | [`../PIPELINE/stage-machine.md`](../PIPELINE/stage-machine.md) |
+| Stage docs | [`../STAGES/README.md`](../STAGES/README.md) |
+| Workflows | [`../WORKFLOWS/README.md`](../WORKFLOWS/README.md) |
+| Design tokens & theming | [`../THEMING/`](../THEMING/) |
+| Motion system | [`../MOTION/`](../MOTION/) |
 
 ---
 
-## Adding a pipeline chapter
+## Review pack
 
-See [../PIPELINE/stage-machine.md](../PIPELINE/stage-machine.md) checklist + [../STAGES/README.md](../STAGES/README.md).
-
----
-
-## UI consistency
-
-- Headlines: `.display-title` (in `ChapterScene` only — **not** in sections)
-- Chapter sections: **`StageLayout`** (compact) or **`CinematicScene`** (immersive) — see [../COMPONENTS/stage-layout.md](../COMPONENTS/stage-layout.md) and [../COMPONENTS/cinematic-scene.md](../COMPONENTS/cinematic-scene.md)
-- Panels: `.museum-card` / `GlassPanel` — hero focal uses `variant="hero"`
-- CTAs: `.btn-primary`
-- Motion: `useMotionPreferences` + `neuralMotion.ts` — respect pause & reduced motion  
-
----
-
-## Naming conventions
-
-| Kind | Convention |
-|------|------------|
-| Stage sections | `FooSection.tsx` in `sections/` |
-| Viz | `PascalCase` in `viz/` |
-| ViewMode IDs | `beginner` \| `engineer` \| `research` (UI: Beginner/Curious/Advanced) |
-
----
-
-## What NOT to break
-
-- `submitPrompt` artifact build sequence  
-- `PreferencesHydrator` + `persistence.ts` key  
-- `useLearningDepth` gating pattern  
-- ChapterScene single-focus layout  
-
----
-
-## After your change
-
-1. Update relevant `docs/STAGES/<id>.md`  
-2. Update [../WORKFLOWS/README.md](../WORKFLOWS/README.md) if flow changed  
-3. Run `npm run build` and `npm run lint`  
+For full context on the current codebase state, open
+[`review-pack.md`](review-pack.md).

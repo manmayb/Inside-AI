@@ -14,7 +14,8 @@ These files remain for reference and optional Curious+ experiments. **Do not imp
 | `PlaybackControls` | Speed + transport (partially duplicated in `SceneChrome`) |
 | `MiniPipelineMap` | Compact stage map |
 | `MobileStageNav` | Mobile rail drawer |
-| `HomeView` / `WelcomeIntro` | Pre-redesign welcome |
+| `HomeView` | Pre-redesign welcome + submit form | **Contains disabled submitPrompt — do not re-enable without a new ADR (ADR-004)** |
+| `WelcomeIntro` | Intro overlay (localStorage gate) | Replaced by `PreJourneyIntro` slides |
 
 Active journey chrome: `SceneChrome`, `SceneProgress`, `ChapterScene`.
 

@@ -5,18 +5,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { EmbeddingPoint } from "@/types/pipeline";
 import { cosineSimilarity } from "@/lib/inference";
 import { usePipelineStore } from "@/store/pipelineStore";
+import { useLearningDepth } from "@/hooks/useLearningDepth"; // CHANGED: import useLearningDepth
+import { useMotionPreferences } from "@/hooks/useMotionPreferences"; // CHANGED: import useMotionPreferences hook
 
-// ── Chapter-specific accent palette: teal / cyan / emerald ──
+// ── Chapter-specific accent palette: mapped to globals.css tokens ──
 const A = {
-  teal:      "#2dd4bf",
-  tealDim:   "rgba(45,212,191,0.12)",
-  tealFaint: "rgba(45,212,191,0.33)",
-  emerald:   "#34d399",
-  blue:      "#60a5fa",
-  violet:    "#c084fc",
-  panel:     "rgba(14,19,26,0.93)",
-  text:      "#f0ede8",
-  muted:     "#8a9199",
+  teal:      "var(--accent)", // CHANGED: replaced hardcoded hex with var(--accent)
+  tealDim:   "var(--accent-glow)", // CHANGED: replaced hardcoded rgba with var(--accent-glow)
+  tealFaint: "var(--accent-beam)", // CHANGED: replaced hardcoded rgba with var(--accent-beam)
+  emerald:   "var(--secondary)", // CHANGED: replaced hardcoded hex with var(--secondary)
+  blue:      "var(--accent-beam)", // CHANGED: replaced hardcoded hex with var(--accent-beam)
+  violet:    "var(--rose)", // CHANGED: replaced hardcoded hex with var(--rose)
+  panel:     "var(--panel)", // CHANGED: replaced hardcoded rgba with var(--panel)
+  text:      "var(--text)", // CHANGED: replaced hardcoded hex with var(--text)
+  muted:     "var(--muted)", // CHANGED: replaced hardcoded hex with var(--muted)
 };
 
 // ── Pre-defined semantic cluster regions ──
@@ -31,10 +33,10 @@ interface Cluster {
 }
 
 const CLUSTERS: Cluster[] = [
-  { id: "language", name: "Language",  color: A.teal,    glow: "rgba(45,212,191,0.11)",  cx: -0.68, cy: -0.26, r: 0.44 },
-  { id: "science",  name: "Science",   color: A.emerald,  glow: "rgba(52,211,153,0.11)",  cx:  0.58, cy: -0.60, r: 0.40 },
-  { id: "code",     name: "Code",      color: A.blue,     glow: "rgba(96,165,250,0.09)",  cx:  0.66, cy:  0.52, r: 0.38 },
-  { id: "concepts", name: "Concepts",  color: A.violet,   glow: "rgba(192,132,252,0.09)", cx: -0.56, cy:  0.60, r: 0.42 },
+  { id: "language", name: "Language",  color: A.teal,    glow: "color-mix(in srgb, var(--accent) 11%, transparent)",  cx: -0.68, cy: -0.26, r: 0.44 }, // CHANGED: replaced hardcoded glow with color-mix
+  { id: "science",  name: "Science",   color: A.emerald,  glow: "color-mix(in srgb, var(--secondary) 11%, transparent)",  cx:  0.58, cy: -0.60, r: 0.40 }, // CHANGED: replaced hardcoded glow with color-mix
+  { id: "code",     name: "Code",      color: A.blue,     glow: "color-mix(in srgb, var(--accent-beam) 9%, transparent)",  cx:  0.66, cy:  0.52, r: 0.38 }, // CHANGED: replaced hardcoded glow with color-mix
+  { id: "concepts", name: "Concepts",  color: A.violet,   glow: "color-mix(in srgb, var(--rose) 9%, transparent)", cx: -0.56, cy:  0.60, r: 0.42 }, // CHANGED: replaced hardcoded glow with color-mix
 ];
 
 // Deterministic star field
@@ -70,6 +72,8 @@ export function EmbeddingSpace({
   cinematic = false,
 }: EmbeddingSpaceProps) {
   const stageProgress = usePipelineStore((s) => s.stageProgress);
+  const { isBeginner } = useLearningDepth(); // CHANGED: acquire isBeginner gate
+  const { repeat } = useMotionPreferences(); // CHANGED: acquire repeat behavior based on motion settings
   const [panelOpen, setPanelOpen] = useState(false);
 
   const selected = points[selectedIndex] ?? null;
@@ -111,7 +115,7 @@ export function EmbeddingSpace({
                 transition={{ delay: i * 0.04, duration: 0.5 }}
                 cx={p.x}
                 cy={-p.y}
-                fill={i === selectedIndex ? A.teal : c.color + "88"}
+                fill={i === selectedIndex ? A.teal : `color-mix(in srgb, ${c.color} 53%, transparent)`} // CHANGED: Replace hex opacity suffix with modern color-mix
                 onClick={() => onSelect(i)}
                 style={{ cursor: "pointer" }}
               />
@@ -119,7 +123,8 @@ export function EmbeddingSpace({
           })}
         </svg>
         <div className="absolute bottom-2 left-3 font-mono text-[9px]" style={{ color: A.tealFaint }}>
-          latent projection · d=4096 → 3D PCA
+          {/* CHANGED: Hide dimensions/projection text in Beginner Mode */}
+          {isBeginner ? "latent projection" : "latent projection · d=4096 → 3D PCA"}
         </div>
       </div>
     );
@@ -180,7 +185,7 @@ export function EmbeddingSpace({
               textAnchor="middle"
               fontSize={0.062}
               fill={c.color}
-              fontFamily="ui-monospace, SFMono-Regular, monospace"
+              fontFamily="var(--font-dm-sans)" // CHANGED: Replace monospace with DM Sans
               letterSpacing={0.025}
               initial={{ opacity: 0 }}
               animate={{ opacity: clusterAlpha * 0.8 }}
@@ -237,7 +242,7 @@ export function EmbeddingSpace({
             ? A.teal
             : isNeighbor
               ? cluster.color
-              : cluster.color + "80";
+              : `color-mix(in srgb, ${cluster.color} 50%, transparent)`; // CHANGED: Replace hex opacity suffix with modern color-mix
 
           return (
             <g key={i} onClick={() => handleClick(i)} style={{ cursor: "pointer" }}>
@@ -253,7 +258,7 @@ export function EmbeddingSpace({
                     r:       [nodeR + 0.03, nodeR + 0.07, nodeR + 0.03],
                     opacity: [0.55, 0.12, 0.55],
                   }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 2.6, repeat: repeat, ease: "easeInOut" }} // CHANGED: wire repeat to motion preferences
                 />
               )}
 
@@ -283,7 +288,7 @@ export function EmbeddingSpace({
                 textAnchor="middle"
                 fontSize={isSelected ? 0.068 : 0.052}
                 fill={isSelected ? A.text : isNeighbor ? cluster.color : A.muted + "bb"}
-                fontFamily="ui-monospace, SFMono-Regular, monospace"
+                fontFamily="var(--font-dm-sans)" // CHANGED: Replace monospace with DM Sans
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.055 + 0.38, duration: 0.5 }}
@@ -302,7 +307,7 @@ export function EmbeddingSpace({
             fill="url(#rg-selected)"
             pointerEvents="none"
             animate={{ opacity: [0.35, 0.75, 0.35] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 3.2, repeat: repeat, ease: "easeInOut" }} // CHANGED: wire repeat to motion preferences
           />
         )}
       </svg>
@@ -334,16 +339,19 @@ export function EmbeddingSpace({
               Token #{selected.tokenIndex}
             </p>
 
-            <div className="mb-3 rounded-lg p-2" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <p className="mb-1 font-mono text-[9px] uppercase tracking-widest" style={{ color: A.muted }}>
-                Vector (4096-d)
-              </p>
-              <p className="font-mono text-[10px] leading-relaxed" style={{ color: A.teal }}>
-                [{selected.x.toFixed(3)},{"\u00a0"}
-                {selected.y.toFixed(3)},{"\u00a0"}
-                {selected.z.toFixed(3)},&nbsp;…]
-              </p>
-            </div>
+            {/* CHANGED: Hide raw vector floating point values in Beginner Mode */}
+            {!isBeginner && (
+              <div className="mb-3 rounded-lg p-2" style={{ background: "rgba(255,255,255,0.04)" }}>
+                <p className="mb-1 font-mono text-[9px] uppercase tracking-widest" style={{ color: A.muted }}>
+                  Vector (4096-d)
+                </p>
+                <p className="font-mono text-[10px] leading-relaxed" style={{ color: A.teal }}>
+                  [{selected.x.toFixed(3)},{"\u00a0"}
+                  {selected.y.toFixed(3)},{"\u00a0"}
+                  {selected.z.toFixed(3)},&nbsp;…]
+                </p>
+              </div>
+            )}
 
             <div>
               <p className="mb-2 font-mono text-[9px] uppercase tracking-widest" style={{ color: A.muted }}>
@@ -366,9 +374,12 @@ export function EmbeddingSpace({
                       <span className="font-mono text-[11px]" style={{ color: A.text }}>
                         {pt.text.trim().slice(0, 10)}
                       </span>
-                      <span className="font-mono text-[10px] tabular-nums" style={{ color: A.teal }}>
-                        {(sim * 100).toFixed(0)}%
-                      </span>
+                      {/* CHANGED: Hide cosine similarity percentage metric in Beginner Mode */}
+                      {!isBeginner && (
+                        <span className="font-mono text-[10px] tabular-nums" style={{ color: A.teal }}>
+                          {(sim * 100).toFixed(0)}%
+                        </span>
+                      )}
                     </div>
                   );
                 })}
@@ -453,14 +464,17 @@ export function EmbeddingSpace({
               </div>
 
               {/* Projection */}
-              <div>
-                <p className="font-mono text-[9px] uppercase tracking-widest" style={{ color: A.muted }}>
-                  Projection
-                </p>
-                <p className="mt-0.5 font-mono text-[10px]" style={{ color: A.muted }}>
-                  4096-d → 3D PCA
-                </p>
-              </div>
+              {/* CHANGED: Hide Projection dimensionality details in Beginner Mode */}
+              {!isBeginner && (
+                <div>
+                  <p className="font-mono text-[9px] uppercase tracking-widest" style={{ color: A.muted }}>
+                    Projection
+                  </p>
+                  <p className="mt-0.5 font-mono text-[10px]" style={{ color: A.muted }}>
+                    4096-d → 3D PCA
+                  </p>
+                </div>
+              )}
 
               {/* Position encoding */}
               <div>
@@ -477,11 +491,12 @@ export function EmbeddingSpace({
       </AnimatePresence>
 
       {/* ── Bottom-left metadata label ── */}
+      {/* CHANGED: Hide raw dimensionality text from bottom-left label in Beginner Mode */}
       <div
         className="pointer-events-none absolute bottom-4 left-4 font-mono text-[10px]"
         style={{ color: A.tealFaint }}
       >
-        latent projection · d=4096 → 3D PCA (simulated)
+        {isBeginner ? "latent projection (simulated)" : "latent projection · d=4096 → 3D PCA (simulated)"}
       </div>
 
       {/* ── Click hint (fades once a token is selected) ── */}
@@ -493,7 +508,7 @@ export function EmbeddingSpace({
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 0.6, 0.4, 0.6] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 2.5, repeat: Infinity, times: [0, 0.2, 0.8, 1] }}
+            transition={{ duration: 2.5, repeat: repeat, times: [0, 0.2, 0.8, 1] }} // CHANGED: wire repeat to motion preferences
           >
             click a token to explore →
           </motion.div>

@@ -20,7 +20,7 @@ export function HomeView() {
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-  const submitPrompt = usePipelineStore((s) => s.submitPrompt);
+  // CHANGED: submitPrompt selector removed — ADR-004 violation, no prelude guard (see HomeView.tsx audit)
   const ragEnabled = usePipelineStore((s) => s.ragEnabled);
   const setRagEnabled = usePipelineStore((s) => s.setRagEnabled);
 
@@ -36,9 +36,10 @@ export function HomeView() {
     (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!canSubmit) return;
-      submitPrompt(trimmed);
+      // LEGACY: submitPrompt call removed — ADR-004 violation, no prelude guard
+      // CHANGED: form submit is now a no-op; journey must start via WelcomeScreen → PreJourneyIntro → Begin
     },
-    [canSubmit, trimmed, submitPrompt]
+    [canSubmit, trimmed] // CHANGED: submitPrompt removed from dep array
   );
 
   const dismissIntro = () => {
