@@ -40,72 +40,82 @@ export function PreJourneyIntro({ prompt, onBegin, onBack }: PreJourneyIntroProp
   };
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-16">
+    <div className="prelude-scene relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="welcome-scene-atmosphere pointer-events-none absolute inset-0" aria-hidden />
+      <div className="prelude-scene-glow pointer-events-none absolute inset-0" aria-hidden />
+      <div className="welcome-scene-vignette pointer-events-none absolute inset-0" aria-hidden />
+
       <button
         type="button"
         onClick={prev}
-        className="absolute left-6 top-6 flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--text)]"
+        className="absolute left-6 top-6 z-20 flex items-center gap-1 text-sm text-[var(--muted)] transition hover:text-[var(--text)] md:left-10 md:top-8"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </button>
 
-      <AnimatePresence mode="wait">
-        {!isLast ? (
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="max-w-lg text-center"
-          >
-            <p className="text-sm font-medium text-[var(--accent)]">
-              Before we begin · {step + 1} / {SLIDES.length}
-            </p>
-            <h2 className="display-title mt-4 text-3xl text-[var(--text)] md:text-4xl">
-              {SLIDES[step].title}
-            </h2>
-            <p className="mt-5 text-lg leading-relaxed text-[var(--muted)]">
-              {SLIDES[step].body}
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="ready"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-lg text-center"
-          >
-            <p className="text-sm font-medium text-[var(--accent)]">Your question</p>
-            <blockquote className="display-title mt-4 text-2xl text-[var(--text)] md:text-3xl">
-              &ldquo;{prompt.length > 120 ? `${prompt.slice(0, 120)}…` : prompt}&rdquo;
-            </blockquote>
-            <p className="mt-6 text-[var(--muted)]">
-              Press play when you&apos;re ready. You can pause anytime.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <main className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-20 md:px-12">
+        <AnimatePresence mode="wait">
+          {!isLast ? (
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.55, ease: [0.22, 0.68, 0.12, 1] }}
+              className="max-w-xl text-center"
+            >
+              <p className="text-[10px] font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
+                Before we begin · {step + 1} / {SLIDES.length}
+              </p>
+              <h2 className="display-title mt-5 text-[clamp(1.75rem,4.5vw,2.75rem)] leading-tight text-[var(--text)]">
+                {SLIDES[step].title}
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-[var(--muted)] md:text-lg">
+                {SLIDES[step].body}
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="ready"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="max-w-xl text-center"
+            >
+              <p className="text-[10px] font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
+                Your question
+              </p>
+              <blockquote className="display-title mt-5 text-[clamp(1.5rem,4vw,2.25rem)] leading-snug text-[var(--text)]">
+                &ldquo;{prompt.length > 120 ? `${prompt.slice(0, 120)}…` : prompt}&rdquo;
+              </blockquote>
+              <p className="mt-6 text-[var(--muted)]">
+                Press play when you&apos;re ready. You can pause anytime.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
 
-      <div className="mt-14 flex flex-col items-center gap-4">
-        <div className="flex gap-2">
-          {[...SLIDES, { title: "ready" }].map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i === step ? "w-8 bg-[var(--accent)]" : "w-1.5 bg-[var(--muted)]/40"
-              }`}
-            />
-          ))}
+      <footer className="prelude-scene-footer relative z-10 px-6 pb-8 md:px-12">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-5">
+          <div className="flex gap-2">
+            {[...SLIDES, { title: "ready" }].map((_, i) => (
+              <span
+                key={i}
+                className={`h-1 rounded-full transition-all ${
+                  i === step ? "w-7 bg-[var(--accent)]" : "w-1 bg-[var(--muted)]/35"
+                }`}
+              />
+            ))}
+          </div>
+          <button type="button" onClick={next} className="btn-primary min-w-[12rem]">
+            {isLast ? "Begin" : "Continue"}
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
-        <button type="button" onClick={next} className="btn-primary min-w-[200px]">
-          {isLast ? "Begin" : "Continue"}
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
+      </footer>
     </div>
   );
 }

@@ -16,6 +16,8 @@ Major UI and visualization components. **Active path** = used in documentary jou
 | `SceneChrome` | `journey/SceneChrome.tsx` | Transport + menu |
 | `JourneyComplete` | `journey/JourneyComplete.tsx` | Finale overlay |
 | `StageSection` | `sections/StageContent.tsx` | Stage router |
+| `StageLayout` | `ui/StageLayout.tsx` | Compact chapter composition |
+| `CinematicScene` | `ui/CinematicScene.tsx` | Viewport-owned immersive scenes — [cinematic-scene.md](./cinematic-scene.md) |
 
 ## Visualizations
 

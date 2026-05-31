@@ -3,11 +3,14 @@
 import { motion } from "framer-motion";
 import { Database, Search } from "lucide-react";
 import { GlassPanel } from "@/components/ui/GlassPanel";
+import { StageLayout } from "@/components/ui/StageLayout";
+import { StageSectionHeader } from "@/components/ui/StageSectionHeader";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences";
 import { usePipelineStore } from "@/store/pipelineStore";
 
 export function RAGSection() {
-  const ragEnabled = usePipelineStore((s) => s.ragEnabled);
   const stageProgress = usePipelineStore((s) => s.stageProgress);
+  const { motionEnabled, repeat } = useMotionPreferences();
 
   const chunks = [
     { id: "doc_42", score: 0.94, text: "Qubits exploit superposition and entanglement…" },
@@ -15,50 +18,54 @@ export function RAGSection() {
     { id: "doc_91", score: 0.81, text: "Shor's algorithm factors integers exponentially faster…" },
   ];
 
-  if (!ragEnabled) {
-    return (
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-2xl font-semibold text-white">RAG &amp; Tools</h2>
-        <p className="mt-4 text-slate-500">
-          RAG mode disabled. Enable on the home screen before submitting to visualize retrieval.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <header>
-        <h2 className="text-2xl font-semibold text-white">RAG &amp; Tool Pipeline</h2>
-        <p className="mt-1 text-sm text-slate-500">Vector search → chunk ranking → context injection</p>
-      </header>
-
-      <div className="flex items-center justify-center gap-8 py-8">
-        <Search className="h-12 w-12 text-cyan-400" />
-        <motion.div
-          className="h-1 w-32 bg-gradient-to-r from-cyan-500 to-violet-500"
-          animate={{ scaleX: [0.3, 1, 0.3] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        />
-        <Database className="h-12 w-12 text-violet-400" />
-      </div>
-
-      <GlassPanel title="Retrieved chunks" glow="secondary">
-        {chunks.map((c, i) => (
-          <motion.div
-            key={c.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: stageProgress > i * 30 ? 1 : 0.2, x: 0 }}
-            className="mb-3 rounded-lg border border-white/5 p-3 last:mb-0"
-          >
-            <div className="flex justify-between font-mono text-xs">
-              <span className="text-violet-400">{c.id}</span>
-              <span className="text-cyan-400">cos={c.score}</span>
-            </div>
-            <p className="mt-2 text-sm text-slate-400">{c.text}</p>
-          </motion.div>
-        ))}
-      </GlassPanel>
-    </div>
+    <StageLayout
+      insight="The AI searches notes or documents first, then uses what it finds to answer more accurately."
+      focal={
+        <>
+          <div className="flex items-center justify-center gap-8 py-2">
+            <Search className="h-10 w-10 text-[var(--accent)]" aria-hidden />
+            <motion.div
+              className="h-1 w-24 rounded-full bg-[var(--gradient-brand)]"
+              animate={motionEnabled ? { scaleX: [0.4, 1, 0.4] } : { scaleX: 1 }}
+              transition={{ repeat, duration: 2 }}
+            />
+            <Database className="h-10 w-10 text-[var(--secondary)]" aria-hidden />
+          </div>
+          <GlassPanel title="Best matches" variant="hero" glow="secondary">
+            {chunks.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: stageProgress > i * 30 ? 1 : 0.35, x: 0 }}
+                className="mb-3 rounded-lg border border-[var(--panel-border)] p-3 last:mb-0"
+              >
+                <p className="text-xs font-medium text-[var(--accent)]">Match {i + 1}</p>
+                <p className="mt-2 text-sm text-[var(--muted)]">{c.text}</p>
+              </motion.div>
+            ))}
+          </GlassPanel>
+        </>
+      }
+      curious={
+        <>
+          <StageSectionHeader stage="rag" icon={Search} />
+          <GlassPanel title="Retrieved chunks" divider={false}>
+            {chunks.map((c) => (
+              <div
+                key={c.id}
+                className="mb-3 rounded-lg border border-[var(--panel-border)] p-3 font-mono text-xs last:mb-0"
+              >
+                <div className="flex justify-between text-[var(--muted)]">
+                  <span>{c.id}</span>
+                  <span className="text-[var(--accent)]">score={c.score}</span>
+                </div>
+                <p className="mt-2 text-sm text-[var(--text)]">{c.text}</p>
+              </div>
+            ))}
+          </GlassPanel>
+        </>
+      }
+    />
   );
 }

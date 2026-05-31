@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { panelChild } from "@/motion/stageTransitions";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences";
 import { cn } from "@/lib/utils";
 
 interface GlassPanelProps {
@@ -10,7 +11,11 @@ interface GlassPanelProps {
   title?: string;
   subtitle?: string;
   glow?: "accent" | "secondary" | "emerald" | "amber" | "none";
-  variant?: "default" | "strong";
+  variant?: "default" | "strong" | "hero";
+  /** Title divider — off for hero surfaces to avoid double-border noise */
+  divider?: boolean;
+  /** Entrance animation — default off for calmer chapters */
+  animate?: boolean;
   float?: boolean;
 }
 
@@ -29,31 +34,64 @@ export function GlassPanel({
   subtitle,
   glow = "none",
   variant = "default",
-  float = true,
+  divider = true,
+  animate = false,
+  float = false,
 }: GlassPanelProps) {
+  const { motionEnabled } = useMotionPreferences();
+
+  const surfaceClass = cn(
+    variant === "hero" || variant === "strong"
+      ? "museum-card-elevated"
+      : "museum-card",
+    variant === "hero" && "ring-1 ring-[var(--accent-dim)]",
+    glowMap[glow],
+    float && "my-1",
+    className
+  );
+
+  const header =
+    (title || subtitle) && divider ? (
+      <div className="border-b border-[var(--panel-border)] px-5 py-4">
+        {title && <h3 className="text-sm font-medium text-[var(--accent)]">{title}</h3>}
+        {subtitle && (
+          <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{subtitle}</p>
+        )}
+      </div>
+    ) : title || subtitle ? (
+      <div className="px-5 pt-5">
+        {title && <h3 className="text-sm font-medium text-[var(--accent)]">{title}</h3>}
+        {subtitle && (
+          <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{subtitle}</p>
+        )}
+      </div>
+    ) : null;
+
+  const body = (
+    <>
+      {header}
+      <div className={cn("relative", title || subtitle ? "p-5" : "p-5")}>{children}</div>
+    </>
+  );
+
+  if (animate && motionEnabled) {
+    return (
+      <motion.div
+        variants={panelChild}
+        initial="initial"
+        animate="animate"
+        className={surfaceClass}
+        role={title ? "region" : undefined}
+        aria-label={title}
+      >
+        {body}
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.div
-      variants={panelChild}
-      initial="initial"
-      animate="animate"
-      className={cn(
-        variant === "strong" ? "museum-card-elevated" : "museum-card",
-        glowMap[glow],
-        float && "my-1",
-        className
-      )}
-    >
-      {(title || subtitle) && (
-        <div className="border-b border-[var(--panel-border)] px-5 py-4">
-          {title && (
-            <h3 className="text-sm font-medium text-[var(--accent)]">{title}</h3>
-          )}
-          {subtitle && (
-            <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{subtitle}</p>
-          )}
-        </div>
-      )}
-      <div className="relative p-5">{children}</div>
-    </motion.div>
+    <div className={surfaceClass} role={title ? "region" : undefined} aria-label={title}>
+      {body}
+    </div>
   );
 }

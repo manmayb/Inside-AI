@@ -9,6 +9,7 @@ interface HiddenStateFlowProps {
   inspectedLayer: number;
   selectedTokenIndex: number;
   maxLayers?: number;
+  cinematic?: boolean;
 }
 
 function HiddenStateFlowInner({
@@ -16,6 +17,7 @@ function HiddenStateFlowInner({
   inspectedLayer,
   selectedTokenIndex,
   maxLayers = 24,
+  cinematic = false,
 }: HiddenStateFlowProps) {
   const layerCount = slices[0]?.layerMagnitudes.length ?? maxLayers;
 
@@ -31,8 +33,14 @@ function HiddenStateFlowInner({
   }, [slices, layerCount]);
 
   return (
-    <div className="relative w-full overflow-x-auto rounded-xl border border-white/5 bg-black/50 p-4">
-      <svg viewBox="0 0 100 55" className="min-w-[600px] w-full" preserveAspectRatio="none">
+    <div
+      className={`relative w-full ${cinematic ? "flex h-full min-h-0 flex-col justify-center px-6 py-12" : "overflow-x-auto rounded-xl border border-white/5 bg-black/50 p-4"}`}
+    >
+      <svg
+        viewBox="0 0 100 55"
+        className={cinematic ? "h-full w-full min-h-[200px]" : "min-w-[600px] w-full"}
+        preserveAspectRatio="none"
+      >
         <defs>
           <linearGradient id="hs-grad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2" />

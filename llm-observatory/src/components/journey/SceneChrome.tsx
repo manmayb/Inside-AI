@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,10 +14,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ModeToggle } from "@/components/layout/ModeToggle";
 import { HelpDrawer } from "@/components/layout/HelpDrawer";
 import { GlossaryDrawer } from "@/components/layout/GlossaryDrawer";
-import { usePipelineStore } from "@/store/pipelineStore";
 import { STAGE_META } from "@/lib/constants";
-import { PIPELINE_STAGES } from "@/types/pipeline";
+import { getActiveStages, usePipelineStore } from "@/store/pipelineStore";
 import { useLearningDepth } from "@/hooks/useLearningDepth";
+import { useSceneComposition } from "@/hooks/useSceneComposition";
+import { cn } from "@/lib/utils";
 import { SceneProgress } from "./SceneProgress";
 
 interface SceneChromeProps {
@@ -26,6 +27,7 @@ interface SceneChromeProps {
 
 export function SceneChrome({ onExit }: SceneChromeProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const currentStage = usePipelineStore((s) => s.currentStage);
   const stageProgress = usePipelineStore((s) => s.stageProgress);
   const isPaused = usePipelineStore((s) => s.isPaused);
@@ -36,9 +38,12 @@ export function SceneChrome({ onExit }: SceneChromeProps) {
   const reset = usePipelineStore((s) => s.reset);
   const rerunTour = usePipelineStore((s) => s.rerunTour);
   const viewMode = usePipelineStore((s) => s.viewMode);
+  const ragEnabled = usePipelineStore((s) => s.ragEnabled);
   const { isBeginner } = useLearningDepth();
+  const { minimizeChrome } = useSceneComposition();
 
-  const idx = PIPELINE_STAGES.indexOf(currentStage);
+  const stages = getActiveStages(ragEnabled);
+  const idx = stages.indexOf(currentStage);
   const label =
     viewMode === "beginner"
       ? STAGE_META[currentStage].simpleLabel
@@ -49,14 +54,57 @@ export function SceneChrome({ onExit }: SceneChromeProps) {
     onExit();
   };
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    menuRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const dwelling = stageProgress >= 100 && !generationComplete && !isPaused;
+
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex flex-col items-center gap-3 bg-gradient-to-t from-[var(--void)] via-[var(--void)]/90 to-transparent px-4 pb-6 pt-16">
-        <div className="pointer-events-auto w-full max-w-lg">
-          <SceneProgress />
-        </div>
+      {isPaused && !generationComplete && (
+        <p
+          className="pointer-events-none fixed left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-[var(--panel-border)] bg-[var(--deep)]/90 px-4 py-1.5 text-xs text-[var(--muted)] backdrop-blur-md"
+          role="status"
+          aria-live="polite"
+        >
+          Paused — press Space to continue
+        </p>
+      )}
+      {dwelling && (
+        <p
+          className="pointer-events-none fixed left-1/2 top-4 z-30 -translate-x-1/2 rounded-full border border-[var(--panel-border)] bg-[var(--deep)]/90 px-4 py-1.5 text-xs text-[var(--muted)] backdrop-blur-md"
+          role="status"
+          aria-live="polite"
+        >
+          Take a moment — next chapter shortly
+        </p>
+      )}
+      <div
+        className={cn(
+          "scene-chrome pointer-events-none fixed inset-x-0 bottom-0 z-30 flex flex-col items-center gap-2 bg-gradient-to-t from-[var(--void)] via-[var(--void)]/75 to-transparent px-4 pb-4",
+          minimizeChrome ? "pt-6" : "gap-3 pb-6 pt-12"
+        )}
+        data-chrome-mode={minimizeChrome ? "minimal" : "standard"}
+      >
+        {!minimizeChrome && (
+          <div className="pointer-events-auto w-full max-w-lg">
+            <SceneProgress />
+          </div>
+        )}
 
-        <div className="pointer-events-auto flex w-full max-w-lg items-center justify-between gap-2 rounded-2xl border border-[var(--panel-border)] bg-[var(--deep)]/90 px-3 py-2 backdrop-blur-md">
+        <div
+          className={cn(
+            "pointer-events-auto flex w-full items-center justify-between gap-2 rounded-2xl border border-[var(--panel-border)] bg-[var(--deep)]/80 px-3 backdrop-blur-md",
+            minimizeChrome ? "max-w-md py-1.5" : "max-w-lg py-2"
+          )}
+        >
           <button
             type="button"
             onClick={goToPrevStage}
@@ -116,16 +164,24 @@ export function SceneChrome({ onExit }: SceneChromeProps) {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 p-4 backdrop-blur-sm sm:items-center"
             onClick={() => setMenuOpen(false)}
+            role="presentation"
           >
             <motion.div
+              ref={menuRef}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="journey-menu-title"
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 24, opacity: 0 }}
-              className="museum-card-elevated w-full max-w-sm p-6"
+              className="museum-card-elevated w-full max-w-sm p-6 outline-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-4 flex items-center justify-between">
-                <p className="font-medium text-[var(--text)]">Journey menu</p>
+                <p id="journey-menu-title" className="font-medium text-[var(--text)]">
+                  Journey menu
+                </p>
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}

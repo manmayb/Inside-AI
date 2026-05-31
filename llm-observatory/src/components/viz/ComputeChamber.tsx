@@ -7,13 +7,16 @@ import { NEURAL_TIMING } from "@/motion/neuralMotion";
 interface ComputeChamberProps {
   stageProgress: number;
   gpuCount?: number;
+  cinematic?: boolean;
 }
 
-function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProps) {
+function ComputeChamberInner({ stageProgress, gpuCount = 8, cinematic = false }: ComputeChamberProps) {
   const phase = stageProgress / 100;
 
   return (
-    <div className="relative min-h-[220px] overflow-hidden">
+    <div
+      className={`relative overflow-hidden ${cinematic ? "flex h-full min-h-0 flex-col justify-center px-6 py-8" : "min-h-[220px]"}`}
+    >
       <div
         className="absolute inset-0 opacity-50"
         style={{
@@ -22,7 +25,7 @@ function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProp
         }}
       />
 
-      <div className="relative grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className={`relative grid gap-3 ${cinematic ? "grid-cols-2 gap-4 md:grid-cols-4 md:gap-5" : "grid-cols-2 md:grid-cols-4"}`}>
         {Array.from({ length: gpuCount }).map((_, i) => {
           const load = 50 + ((stageProgress + i * 11) % 100) * 0.45;
           const corridor = i % 2 === 0;

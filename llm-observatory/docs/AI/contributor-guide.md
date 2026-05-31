@@ -43,10 +43,11 @@ See [../PIPELINE/stage-machine.md](../PIPELINE/stage-machine.md) checklist + [..
 
 ## UI consistency
 
-- Headlines: `.display-title`  
-- Panels: `.museum-card` / `GlassPanel`  
-- CTAs: `.btn-primary`  
-- Motion easing: `src/motion/neuralMotion.ts`  
+- Headlines: `.display-title` (in `ChapterScene` only — **not** in sections)
+- Chapter sections: **`StageLayout`** (compact) or **`CinematicScene`** (immersive) — see [../COMPONENTS/stage-layout.md](../COMPONENTS/stage-layout.md) and [../COMPONENTS/cinematic-scene.md](../COMPONENTS/cinematic-scene.md)
+- Panels: `.museum-card` / `GlassPanel` — hero focal uses `variant="hero"`
+- CTAs: `.btn-primary`
+- Motion: `useMotionPreferences` + `neuralMotion.ts` — respect pause & reduced motion  
 
 ---
 

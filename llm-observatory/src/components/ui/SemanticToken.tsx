@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences";
 import { cn } from "@/lib/utils";
 
 interface SemanticTokenProps {
@@ -13,7 +14,7 @@ interface SemanticTokenProps {
   style?: React.CSSProperties;
 }
 
-/** Living semantic entity — not a dashboard chip */
+/** Living semantic entity — keyboard-focusable word piece */
 export function SemanticToken({
   children,
   active,
@@ -23,19 +24,24 @@ export function SemanticToken({
   className,
   style,
 }: SemanticTokenProps) {
+  const { motionEnabled } = useMotionPreferences();
+  const label = typeof children === "string" ? children : `Word ${index + 1}`;
+
   return (
     <motion.button
       type="button"
       data-active={active ? "true" : "false"}
+      aria-pressed={active}
+      aria-label={label}
       onClick={onClick}
-      initial={{ opacity: 0, scale: 0.6, filter: "blur(4px)" }}
+      initial={motionEnabled ? { opacity: 0, scale: 0.6, filter: "blur(4px)" } : false}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      transition={{ delay: index * 0.05, duration: 0.5, ease: [0.22, 0.68, 0.12, 1] }}
-      whileHover={{ scale: 1.06 }}
+      transition={{ delay: motionEnabled ? index * 0.05 : 0, duration: 0.5, ease: [0.22, 0.68, 0.12, 1] }}
+      whileHover={motionEnabled ? { scale: 1.04 } : undefined}
       className={cn(
-        "semantic-token px-4 py-2 font-mono text-sm text-[var(--text)]",
-        compare && "!border-violet-400/50 !shadow-[0_0_24px_rgba(139,92,246,0.35)]",
-        compare && "text-violet-200",
+        "semantic-token px-4 py-2 text-sm text-[var(--text)]",
+        compare && "!border-[var(--secondary)]/50 !shadow-[0_0_20px_var(--accent-glow)]",
+        compare && "text-[var(--secondary)]",
         className
       )}
       style={style}

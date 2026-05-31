@@ -16,7 +16,7 @@ export function ChapterBrainFocus() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="mx-auto max-w-md px-6 py-2 text-center"
-      aria-hidden
+      aria-live="polite"
     >
       <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--panel-border)] bg-[var(--elevated)] px-4 py-2">
         <span className="relative flex h-2.5 w-2.5">

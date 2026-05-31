@@ -61,6 +61,12 @@ export function ObservatoryApp() {
       data-view={viewMode}
       data-phase={phase}
     >
+      <a
+        href="#chapter-content"
+        className={`skip-link ${phase !== "journey" ? "skip-link--hidden" : ""}`}
+      >
+        Skip to chapter
+      </a>
       <PreferencesHydrator />
       <AmbientShell calm />
       <div className="relative z-10 flex h-full min-h-0 flex-col">
