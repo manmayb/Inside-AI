@@ -35,7 +35,7 @@ export function StageLayout({
   const { isBeginner } = useLearningDepth();
 
   return (
-    <div className={cn("chapter-stack scene-compact-content flex h-full min-h-0 flex-col justify-center gap-4", className)}>
+    <div className={cn("chapter-stack scene-compact-content flex h-full min-h-0 flex-col justify-center gap-8", className)}> {/* CHANGED: Increased gap from gap-4 to gap-8 for museum-scale spatial comfort */}
       {insight != null && isBeginner &&
         (typeof insight === "string" ? <SimpleInsight>{insight}</SimpleInsight> : insight)}
       {focal}

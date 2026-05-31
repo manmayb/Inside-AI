@@ -6,11 +6,15 @@ import { usePipelineStore } from "@/store/pipelineStore";
 import { NEURAL_TIMING } from "@/motion/neuralMotion";
 import { cn } from "@/lib/utils";
 import { useSceneComposition } from "@/hooks/useSceneComposition";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences"; // CHANGED: Imported useMotionPreferences hook
+import { useLearningDepth } from "@/hooks/useLearningDepth"; // CHANGED: Imported useLearningDepth hook
 
 const VISIBLE = 18;
 
 function TransformerCityInner() {
   const { mode } = useSceneComposition();
+  const { repeat } = useMotionPreferences(); // CHANGED: Fetch preference-driven repeat behavior
+  const { isBeginner } = useLearningDepth(); // CHANGED: Destructured isBeginner from hook
   const cinematic = mode === "cinematic";
   const config = usePipelineStore((s) => s.config);
   const stageProgress = usePipelineStore((s) => s.stageProgress);
@@ -73,13 +77,13 @@ function TransformerCityInner() {
           }}
           transition={{
             duration: NEURAL_TIMING.signalPulse,
-            repeat: Infinity,
+            repeat, // CHANGED: Wired repeat to motion preferences
             ease: "easeInOut",
           }}
         />
       ))}
 
-      <div className="relative flex max-h-[min(52vh,480px)] min-h-[200px] w-full max-w-5xl flex-1 items-end justify-center gap-0.5 pb-2 pt-4">
+      <div className="relative flex max-h-[min(52vh,480px)] min-h-[200px] w-full max-w-5xl flex-1 items-stretch justify-center gap-0.5"> {/* CHANGED: Changed items-end to items-stretch and removed vertical padding to optimize visual rhythm and vertical bounds */}
         {towers.map((t) => {
           const isActive = t.layer === activeLayer;
           const isFocus = t.layer === focusLayer;
@@ -103,7 +107,7 @@ function TransformerCityInner() {
                   className="absolute -top-6 h-8 w-16 rounded-full blur-xl"
                   style={{ background: "var(--accent-beam)" }}
                   animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.2, 0.9] }}
-                  transition={{ duration: NEURAL_TIMING.tensorFlow, repeat: Infinity }}
+                  transition={{ duration: NEURAL_TIMING.tensorFlow, repeat }} // CHANGED: Wired repeat to motion preferences
                 />
               )}
 
@@ -132,12 +136,12 @@ function TransformerCityInner() {
                   animate={{ y: ["100%", "-20%"] }}
                   transition={{
                     duration: NEURAL_TIMING.tensorFlow,
-                    repeat: Infinity,
+                    repeat, // CHANGED: Wired repeat to motion preferences
                     ease: "linear",
                   }}
                 />
 
-                {["MHSA", "FFN", "LN"].map((block, bi) => (
+                {!isBeginner && ["MHSA", "FFN", "LN"].map((block, bi) => ( // CHANGED: Gated technical component labels in beginner mode
                   <div
                     key={block}
                     className="absolute left-0 right-0 mx-0.5 text-center font-mono text-[6px] tracking-wider text-slate-500"
@@ -173,19 +177,21 @@ function TransformerCityInner() {
                       }}
                       transition={{
                         duration: NEURAL_TIMING.tensorFlow + ti * 0.15,
-                        repeat: Infinity,
+                        repeat, // CHANGED: Wired repeat to motion preferences
                         delay: ti * 0.1,
                         ease: [0.45, 0.05, 0.15, 1],
                       }}
                     />
                   ))}
               </div>
-              <span
-                className="mt-2 font-mono text-[7px] tracking-widest"
-                style={{ color: isActive ? "var(--accent)" : "#475569" }}
-              >
-                L{t.layer + 1}
-              </span>
+              {!isBeginner && ( // CHANGED: Gated layer index label in beginner mode
+                <span
+                  className="mt-2 font-mono text-[7px] tracking-widest"
+                  style={{ color: isActive ? "var(--accent)" : "#475569" }}
+                >
+                  L{t.layer + 1}
+                </span>
+              )}
             </motion.div>
           );
         })}
@@ -197,26 +203,34 @@ function TransformerCityInner() {
           cinematic ? "bottom-4" : "bottom-6"
         )}
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[var(--accent)]">
-          Transformer megastructure
-        </p>
-        <p className="mt-1 font-mono text-[9px] text-[var(--muted)]">
-          {config.layers} layers · residual stream · d={config.hiddenDim}
-        </p>
+        {!isBeginner && ( // CHANGED: Gated bottom technical labels in beginner mode
+          <>
+            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[var(--accent)]">
+              Transformer megastructure
+            </p>
+            <p className="mt-1 font-mono text-[9px] text-[var(--muted)]">
+              {config.layers} layers · residual stream · d={config.hiddenDim}
+            </p>
+          </>
+        )}
       </div>
 
-      <div className="pointer-events-none absolute left-4 top-[calc(var(--scene-header-h)+0.5rem)] font-mono text-[9px] uppercase tracking-widest text-[var(--accent)]">
-        <motion.span
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: NEURAL_TIMING.signalPulse, repeat: Infinity }}
-        >
-          Signal L{activeLayer + 1}
-        </motion.span>
-      </div>
+      {!isBeginner && ( // CHANGED: Gated top-left signal indicator in beginner mode
+        <div className="pointer-events-none absolute left-4 top-[calc(var(--scene-header-h)+0.5rem)] font-mono text-[9px] uppercase tracking-widest text-[var(--accent)]">
+          <motion.span
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: NEURAL_TIMING.signalPulse, repeat }} // CHANGED: Wired repeat to motion preferences
+          >
+            Signal L{activeLayer + 1}
+          </motion.span>
+        </div>
+      )}
 
-      <div className="pointer-events-none absolute right-4 top-[calc(var(--scene-header-h)+0.5rem)] max-w-[140px] text-right font-mono text-[8px] leading-relaxed text-[var(--muted)]">
-        Flying through artificial cognition
-      </div>
+      {!isBeginner && ( // CHANGED: Gated top-right cognitive label in beginner mode
+        <div className="pointer-events-none absolute right-4 top-[calc(var(--scene-header-h)+0.5rem)] max-w-[140px] text-right font-mono text-[8px] leading-relaxed text-[var(--muted)]">
+          Flying through artificial cognition
+        </div>
+      )}
     </div>
   );
 }

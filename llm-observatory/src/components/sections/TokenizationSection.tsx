@@ -8,9 +8,11 @@ import { StageLayout } from "@/components/ui/StageLayout";
 import { Equation } from "@/components/ui/Equation";
 import { StageSectionHeader } from "@/components/ui/StageSectionHeader";
 import { usePipelineStore } from "@/store/pipelineStore";
+import { useLearningDepth } from "@/hooks/useLearningDepth"; // CHANGED: Imported useLearningDepth hook
 import { cn } from "@/lib/utils";
 
 export function TokenizationSection() {
+  const { isBeginner } = useLearningDepth(); // CHANGED: Destructured isBeginner from hook
   const tokens = usePipelineStore((s) => s.tokens);
   const prompt = usePipelineStore((s) => s.prompt);
   const selectedTokenIndex = usePipelineStore((s) => s.selectedTokenIndex);
@@ -22,24 +24,29 @@ export function TokenizationSection() {
     <StageLayout
       insight="The AI splits your sentence into small glowing pieces—each one a unit of meaning it can work with."
       focal={
-        <motion.div
-          className="flex flex-wrap justify-center gap-3"
-          initial="hidden"
-          animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
-        >
-          {tokens.map((t, i) => (
-            <SemanticToken
-              key={i}
-              index={i}
-              active={selectedTokenIndex === i}
-              onClick={() => setSelectedTokenIndex(i)}
-              style={{ opacity: stageProgress > (i / tokens.length) * 60 ? 1 : 0.35 }}
-            >
-              {t.text}
-            </SemanticToken>
-          ))}
-        </motion.div>
+        <div className="flex flex-col items-center"> {/* CHANGED: Added helper container for beginner hint alignment */}
+          <motion.div
+            className="flex flex-wrap justify-center gap-3"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+          >
+            {tokens.map((t, i) => (
+              <SemanticToken
+                key={i}
+                index={i}
+                active={selectedTokenIndex === i}
+                onClick={() => setSelectedTokenIndex(i)}
+                style={{ opacity: stageProgress > (i / tokens.length) * 60 ? 1 : 0.35 }}
+              >
+                {t.text}
+              </SemanticToken>
+            ))}
+          </motion.div>
+          {isBeginner && ( // CHANGED: Added beginner hint text per audit findings
+            <p className="mt-3 text-center text-xs text-[var(--muted)]">Tap a word to highlight it</p>
+          )}
+        </div>
       }
       curious={
         <>

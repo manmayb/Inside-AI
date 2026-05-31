@@ -27,29 +27,70 @@ export function InputSection() {
       insight="Your words travel from you to the AI—like a thought leaving your mind and entering another."
       focal={
         <GlassPanel variant="hero" glow="accent" divider={false}>
-          <div className="flex items-center justify-center gap-6 py-4">
-            <motion.div
-              animate={{ opacity: stageProgress > 20 ? 1 : 0.4 }}
-              className="flex flex-col items-center gap-2"
-            >
-              <Globe className="h-10 w-10 text-[var(--accent)]" aria-hidden />
-              <span className="text-xs text-[var(--muted)]">You</span>
-            </motion.div>
+          <div className="flex h-36 w-full items-center justify-center py-2"> {/* CHANGED: Replaced icon trio with taller, custom SVG network diagram per audit finding */}
+            <svg viewBox="0 0 400 120" className="h-full w-full max-w-lg">
+              <defs>
+                <linearGradient id="network-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="1" />
+                  <stop offset="100%" stopColor="var(--secondary)" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              
+              {/* Connecting paths */}
+              <motion.path
+                d="M 60 60 L 140 30 L 260 30 L 340 60 M 60 60 L 140 90 L 260 90 L 340 60 M 60 60 L 200 60 L 340 60"
+                fill="none"
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth={2}
+              />
+              
+              {/* Animated signals */}
+              {stageProgress > 20 && (
+                <motion.path
+                  d="M 60 60 L 140 30 L 260 30 L 340 60"
+                  fill="none"
+                  stroke="url(#network-flow)"
+                  strokeWidth={2.5}
+                  strokeDasharray="120"
+                  initial={{ strokeDashoffset: 120 }}
+                  animate={motionEnabled ? { strokeDashoffset: 0 } : { strokeDashoffset: 0 }}
+                  transition={{ duration: 2, repeat, ease: "linear" }}
+                />
+              )}
+              {stageProgress > 40 && (
+                <motion.path
+                  d="M 60 60 L 200 60 L 340 60"
+                  fill="none"
+                  stroke="url(#network-flow)"
+                  strokeWidth={2.5}
+                  strokeDasharray="140"
+                  initial={{ strokeDashoffset: 140 }}
+                  animate={motionEnabled ? { strokeDashoffset: 0 } : { strokeDashoffset: 0 }}
+                  transition={{ duration: 1.6, repeat, ease: "linear", delay: 0.2 }}
+                />
+              )}
 
-            <motion.div
-              animate={motionEnabled ? { x: [-12, 12] } : { x: 0 }}
-              transition={{ duration: 1.5, repeat, repeatType: "reverse", ease: "easeInOut" }}
-            >
-              <ArrowRight className="h-6 w-6 text-[var(--accent)]" aria-hidden />
-            </motion.div>
+              {/* Node: You */}
+              <g transform="translate(60, 60)">
+                <circle r={18} fill="var(--panel)" stroke="var(--accent)" strokeWidth={1.5} />
+                <Globe className="h-5 w-5 -translate-x-2.5 -translate-y-2.5 text-[var(--accent)]" />
+                <text y={28} textAnchor="middle" fontSize={9} fill="var(--muted)" fontFamily="var(--font-dm-sans)">You</text>
+              </g>
 
-            <motion.div
-              animate={{ opacity: stageProgress > 50 ? 1 : 0.4 }}
-              className="flex flex-col items-center gap-2"
-            >
-              <Server className="h-10 w-10 text-[var(--secondary)]" aria-hidden />
-              <span className="text-xs text-[var(--muted)]">AI mind</span>
-            </motion.div>
+              {/* Node: Gateway Middle */}
+              <g transform="translate(200, 60)">
+                <circle r={10} fill="var(--panel)" stroke="rgba(255,255,255,0.15)" strokeWidth={1.5} />
+                <circle r={3} fill={stageProgress > 30 ? "var(--accent)" : "rgba(255,255,255,0.2)"} />
+                <text y={20} textAnchor="middle" fontSize={8} fill="var(--muted)" fontFamily="var(--font-dm-sans)">Node</text>
+              </g>
+
+              {/* Node: AI Mind */}
+              <g transform="translate(340, 60)">
+                <circle r={18} fill="var(--panel)" stroke="var(--secondary)" strokeWidth={1.5} />
+                <Server className="h-5 w-5 -translate-x-2.5 -translate-y-2.5 text-[var(--secondary)]" />
+                <text y={28} textAnchor="middle" fontSize={9} fill="var(--muted)" fontFamily="var(--font-dm-sans)">AI Mind</text>
+              </g>
+            </svg>
           </div>
         </GlassPanel>
       }

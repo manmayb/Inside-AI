@@ -31,7 +31,7 @@ function ProbabilityFieldInner({
   );
 
   return (
-    <div className="relative min-h-[220px]" key={animateKey}>
+    <div className="relative min-h-[320px]" key={animateKey}> {/* CHANGED: Increased min-h to 320px per audit finding */}
       <div
         className="pointer-events-none absolute inset-0 opacity-30"
         style={{

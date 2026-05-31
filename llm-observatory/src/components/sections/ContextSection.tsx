@@ -20,23 +20,31 @@ export function ContextSection() {
     <StageLayout
       insight="The AI bundles instructions, past chat, and your question into one working memory."
       focal={
-        <GlassPanel variant="hero" glow="accent" divider={false}>
-          <div className="relative h-10 overflow-hidden rounded-lg bg-[var(--elevated)]">
+        <GlassPanel variant="hero" glow="accent" divider={false} className="min-h-[240px]"> {/* CHANGED: Added min-h-[240px] to preserve vertical sizing limits */}
+          <div className="relative h-16 overflow-hidden rounded-lg bg-[var(--elevated)]"> {/* CHANGED: Expanded height to h-16 for readability */}
             {contextBlocks.map((block, i) => {
               const width = (block.tokens / usedTokens) * 100;
               return (
                 <motion.div
                   key={block.id}
-                  className="absolute top-0 h-full border-r border-[var(--void)]/50"
+                  className="absolute top-0 h-full border-r border-[var(--void)]/50 flex flex-col justify-center px-2 overflow-hidden" // CHANGED: Embedded segment labels inside context bars
                   style={{
                     left: `${contextBlocks.slice(0, i).reduce((a, b) => a + (b.tokens / usedTokens) * 100, 0)}%`,
                     width: `${width}%`,
                     backgroundColor: block.color + "55",
+                    transformOrigin: "left center",
                   }}
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: stageProgress > 30 ? 1 : 0 }}
                   transition={{ delay: i * 0.1 }}
-                />
+                >
+                  <span className="truncate text-[9px] font-semibold uppercase tracking-wider text-[var(--text)]">
+                    {block.label}
+                  </span>
+                  <span className="text-[8px] text-[var(--muted)]">
+                    {block.tokens}T
+                  </span>
+                </motion.div>
               );
             })}
           </div>

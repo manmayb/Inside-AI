@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { AttentionMatrix } from "@/types/pipeline";
 import { getAttentionForToken } from "@/lib/inference";
 import { NEURAL_TIMING } from "@/motion/neuralMotion";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences"; // CHANGED: Imported useMotionPreferences hook
 
 interface AttentionArcsProps {
   matrix: AttentionMatrix;
@@ -19,6 +20,7 @@ function AttentionArcsInner({
   compareIndex = null,
   maxArcs = 8,
 }: AttentionArcsProps) {
+  const { repeat } = useMotionPreferences(); // CHANGED: Fetch repeat state from preferences hook
   const n = matrix.tokens.length;
   const width = Math.min(720, 48 * n + 80);
   const height = 200;
@@ -97,7 +99,7 @@ function AttentionArcsInner({
             transition={{
               duration: NEURAL_TIMING.signalPulse,
               delay: i * 0.08,
-              repeat: Infinity,
+              repeat, // CHANGED: Wired repeat to preferences
               repeatType: "reverse",
               repeatDelay: 0.5,
             }}
@@ -118,7 +120,7 @@ function AttentionArcsInner({
               transition={{
                 duration: NEURAL_TIMING.tensorFlow,
                 delay: i * 0.1,
-                repeat: Infinity,
+                repeat, // CHANGED: Wired repeat to preferences
                 repeatType: "reverse",
               }}
             />
@@ -142,14 +144,14 @@ function AttentionArcsInner({
                       ? { opacity: [0.6, 1, 0.6] }
                       : {}
                 }
-                transition={{ duration: NEURAL_TIMING.signalPulse, repeat: Infinity }}
+                transition={{ duration: NEURAL_TIMING.signalPulse, repeat }} // CHANGED: Wired repeat to preferences
               />
               <text
                 y={22}
                 textAnchor="middle"
                 fill={isSource ? "var(--accent)" : "#94a3b8"}
                 fontSize={9}
-                fontFamily="var(--font-plex-mono)"
+                fontFamily="var(--font-dm-sans)" // CHANGED: Replaced monospace with standard UI font to match visual identity standards
               >
                 {tok.slice(0, 8)}
               </text>

@@ -18,12 +18,12 @@ export function KVCacheSection() {
     <StageLayout
       insight="The AI saves earlier work so it doesn't re-read the whole conversation every time."
       focal={
-        <GlassPanel title="Saved work" subtitle="Green slots are reused on the next word" variant="hero" glow="accent">
+        <GlassPanel title="Saved work" subtitle="Green slots are reused on the next word" variant="hero" glow="accent" className="min-h-[260px]"> {/* CHANGED: Added min-h-[260px] to set standard vertical boundaries */}
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {preview.map((e, i) => (
               <div
                 key={i}
-                className={`rounded-lg border p-3 text-center text-xs ${
+                className={`rounded-lg border py-4 px-3 text-center text-xs ${ // CHANGED: Expanded card vertical padding to py-4 per spatial comfort audit
                   e.reused
                     ? "border-[var(--accent-dim)] bg-[var(--accent-glow)] text-[var(--accent)]"
                     : "border-[var(--panel-border)] bg-[var(--elevated)] text-[var(--muted)]"

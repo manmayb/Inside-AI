@@ -23,15 +23,34 @@ export function SafetySection() {
     <StageLayout
       insight="Filters scan for harmful or policy-breaking content—like a careful editor before speaking."
       focal={
-        <GlassPanel title="Your message" variant="hero" glow="accent" divider={false}>
-          <div className="flex flex-col items-center gap-4 py-2 text-center sm:flex-row sm:text-left">
-            <ShieldCheck className="h-12 w-12 shrink-0 text-[var(--accent)]" aria-hidden />
-            <div>
-              <p className="text-lg font-medium text-[var(--text)]">Looks good to send</p>
-              <p className="mt-1 line-clamp-2 text-sm text-[var(--muted)]">&ldquo;{prompt}&rdquo;</p>
-              <p className="mt-2 text-sm text-[var(--accent)]">
-                Safety score {(safetyScore * 100).toFixed(0)}% (simulated)
-              </p>
+        <GlassPanel title="Your message" variant="hero" glow="accent" divider={false} className="min-h-[200px]"> {/* CHANGED: Added min-h-[200px] bounds wrapper */}
+          <div className="flex flex-col gap-5 py-1">
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+              <ShieldCheck className="h-10 w-10 shrink-0 text-[var(--accent)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-medium text-[var(--text)]">Looks good to send</p>
+                <p className="mt-1 line-clamp-1 text-xs text-[var(--muted)]">&ldquo;{prompt}&rdquo;</p>
+              </div>
+            </div>
+
+            {/* 3-step filter pipeline */}
+            <div className="grid grid-cols-3 gap-2 border-t border-[var(--panel-border)] pt-4"> {/* CHANGED: Added 3-step filter pipeline dashboard inside hero panel */}
+              {[
+                { label: "Input Guard", score: "99%", status: "pass" },
+                { label: "Policy Scan", score: "97%", status: "pass" },
+                { label: "Output Check", score: "98%", status: "pass" },
+              ].map((step, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-lg border border-[var(--panel-border)] bg-[var(--elevated)] p-2.5 text-center text-xs"
+                >
+                  <p className="font-semibold text-[var(--text)] truncate">{step.label}</p>
+                  <div className="mt-1 flex items-center justify-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                    <span className="text-[10px] text-[var(--accent)] font-medium">{step.score}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </GlassPanel>

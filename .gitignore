@@ -1,11 +1,65 @@
-# macOS
+# =============================================================
+# Inside-AI — root .gitignore
+# =============================================================
+
+# ── macOS ────────────────────────────────────────────────────
 .DS_Store
 .AppleDouble
 .LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
 
-# Editor / OS
+# ── Editor / IDE ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 Thumbs.db
 
-# Accidental npm at repo root (app lives in llm-observatory/)
+# ── Node / npm ───────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp.*
+
+# ── Next.js (llm-observatory) ────────────────────────────────
+llm-observatory/.next/
+llm-observatory/out/
+llm-observatory/build/
+llm-observatory/coverage/
+llm-observatory/*.tsbuildinfo
+llm-observatory/next-env.d.ts
+
+# ── TypeScript build info ─────────────────────────────────────
+*.tsbuildinfo
+
+# ── Environment / secrets ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+
+# ── Logs ──────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Package manager lock files at root (app lives in llm-observatory/) ──
 /package-lock.json
-/node_modules/
+
+# ── Vercel / deployment ───────────────────────────────────────
+.vercel
+
+# ── Gemini / AI assistant context ────────────────────────────
+.gemini/

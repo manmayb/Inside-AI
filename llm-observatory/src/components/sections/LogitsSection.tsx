@@ -31,7 +31,7 @@ export function LogitsSection() {
     <StageLayout
       insight="Many possible next words flicker—then one path wins, like the mind settling on a single word."
       focal={
-        <GlassPanel title="Possible next words" variant="hero" glow="accent">
+        <GlassPanel title="Possible next words" variant="hero" glow="accent" className="min-h-[360px]"> {/* CHANGED: Added min-h-[360px] to prevent layout shifting/height mismatches */}
           <ProbabilityField
             candidates={logits}
             animateKey={`${config.sampling}-${config.temperature}-${arStep}`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion"; // CHANGED: Imported motion hook
 import { BarChart3, Check, Copy, Download, Sparkles } from "lucide-react";
 import { formatFlops } from "@/lib/analytics";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -62,6 +63,36 @@ export function AnalyticsSection() {
               {chapterCount} chapters · {metrics.promptTokens} words in · {metrics.outputTokens}{" "}
               words out · about {(metrics.latencyMs / 1000).toFixed(1)}s on this run
             </p>
+
+            {/* Proportional token bar */}
+            <div className="mt-4 w-full max-w-sm"> {/* CHANGED: Added proportional token bar under journey completion metric */}
+              <div className="flex h-3 w-full overflow-hidden rounded-full bg-[var(--elevated)]">
+                <motion.div
+                  className="h-full bg-[var(--accent)]"
+                  style={{ width: `${(metrics.promptTokens / (metrics.promptTokens + metrics.outputTokens)) * 100}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+                <motion.div
+                  className="h-full bg-[var(--secondary)]"
+                  style={{ width: `${(metrics.outputTokens / (metrics.promptTokens + metrics.outputTokens)) * 100}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                />
+              </div>
+              <div className="mt-2 flex justify-between text-[10px] text-[var(--muted)]">
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                  Prompt: {metrics.promptTokens}T
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--secondary)]" />
+                  Output: {metrics.outputTokens}T
+                </span>
+              </div>
+            </div>
           </div>
         </GlassPanel>
       }

@@ -27,7 +27,7 @@ export function StreamingSection() {
     <CinematicScene
       insight="Words arrive one by one—like the mind finishing a sentence in real time."
       hero={
-        <div className="flex h-full flex-col items-center justify-center px-8 md:px-16">
+        <div className="flex h-full min-h-[280px] flex-col items-center justify-center px-8 md:px-16"> {/* CHANGED: Added min-h-[280px] to preserve spatial vertical bounds */}
           <div className="scene-stream-text max-w-2xl text-center text-xl leading-relaxed text-[var(--text)] md:text-2xl lg:text-3xl">
             {streamedText || (
               <span className="text-[var(--muted)]">The reply is forming…</span>

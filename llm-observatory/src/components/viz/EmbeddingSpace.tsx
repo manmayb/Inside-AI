@@ -122,10 +122,12 @@ export function EmbeddingSpace({
             );
           })}
         </svg>
-        <div className="absolute bottom-2 left-3 font-mono text-[9px]" style={{ color: A.tealFaint }}>
-          {/* CHANGED: Hide dimensions/projection text in Beginner Mode */}
-          {isBeginner ? "latent projection" : "latent projection · d=4096 → 3D PCA"}
-        </div>
+        {!isBeginner && ( // CHANGED: Wrapped in isBeginner gate to hide advanced latent space text per audit requirements
+          <div className="absolute bottom-2 left-3 font-mono text-[9px]" style={{ color: A.tealFaint }}>
+            {/* CHANGED: Hide dimensions/projection text in Beginner Mode */}
+            {isBeginner ? "latent projection" : "latent projection · d=4096 → 3D PCA"}
+          </div>
+        )}
       </div>
     );
   }

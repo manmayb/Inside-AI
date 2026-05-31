@@ -30,36 +30,70 @@ export function AutoregressiveSection() {
   const stageProgress = usePipelineStore((s) => s.stageProgress);
   const visibleCount = Math.floor((stageProgress / 100) * generatedTokens.length);
   const activeStep = arStep % LOOP_STEPS.length;
-  const { motionEnabled } = useMotionPreferences();
+  const { motionEnabled, repeat } = useMotionPreferences(); // CHANGED: Fetch motion repeat settings
 
   return (
     <StageLayout
       insight="Write one word → think again → write another—until the reply is complete."
       focal={
-        <GlassPanel title="The writing loop" variant="hero" glow="accent">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {LOOP_STEPS.map((step, i) => (
-              <motion.div
-                key={step.id}
-                className="rounded-full border border-[var(--panel-border)] bg-[var(--elevated)] px-4 py-2 text-sm text-[var(--text)]"
-                animate={
-                  motionEnabled
-                    ? {
-                        scale: activeStep === i ? 1.04 : 1,
-                        borderColor:
-                          activeStep === i ? "var(--accent-dim)" : "var(--panel-border)",
-                      }
-                    : undefined
-                }
-              >
-                {step.label}
-                {i < LOOP_STEPS.length - 1 && (
-                  <span className="ml-2 text-[var(--muted)]" aria-hidden>
-                    →
-                  </span>
-                )}
-              </motion.div>
-            ))}
+        <GlassPanel title="The writing loop" variant="hero" glow="accent" className="min-h-[260px]"> {/* CHANGED: Added min-h-[260px] wrapper per spatial comfort audit */}
+          <div className="flex flex-col items-center justify-center py-2">
+            <svg viewBox="0 0 300 200" className="mx-auto h-40 w-40 sm:h-44 sm:w-44"> {/* CHANGED: Replaced static text chips with circular loop visual per audit findings */}
+              {/* Circular trace path */}
+              <circle
+                cx={150}
+                cy={100}
+                r={65}
+                fill="none"
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+              />
+              
+              {/* Active step connector arc */}
+              <motion.circle
+                cx={150}
+                cy={100}
+                r={65}
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth={3}
+                strokeDasharray="80 320"
+                animate={{ rotate: activeStep * 72 }}
+                transition={{ type: "spring", stiffness: 60, damping: 15 }}
+                style={{ originX: "150px", originY: "100px" }}
+              />
+
+              {LOOP_STEPS.map((step, i) => {
+                const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                const x = 150 + 65 * Math.cos(angle);
+                const y = 100 + 65 * Math.sin(angle);
+                const isActive = activeStep === i;
+
+                return (
+                  <g key={step.id} transform={`translate(${x}, ${y})`}>
+                    <motion.circle
+                      r={isActive ? 12 : 7}
+                      fill={isActive ? "var(--accent)" : "var(--panel)"}
+                      stroke={isActive ? "var(--accent)" : "rgba(255,255,255,0.15)"}
+                      strokeWidth={1.5}
+                      animate={isActive && motionEnabled ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                      transition={{ duration: 1.5, repeat }}
+                    />
+                    <text
+                      y={isActive ? -18 : -12}
+                      textAnchor="middle"
+                      fontSize={isActive ? 9 : 7}
+                      fontWeight={isActive ? "bold" : "normal"}
+                      fill={isActive ? "var(--accent)" : "var(--muted)"}
+                      fontFamily="var(--font-dm-sans)"
+                    >
+                      {step.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
           {visibleCount > 0 && (
             <p className="mt-5 text-center text-sm text-[var(--muted)]">

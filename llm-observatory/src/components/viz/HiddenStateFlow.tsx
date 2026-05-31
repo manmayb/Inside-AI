@@ -3,6 +3,7 @@
 import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { HiddenStateSlice } from "@/types/pipeline";
+import { useLearningDepth } from "@/hooks/useLearningDepth"; // CHANGED: Imported useLearningDepth hook
 
 interface HiddenStateFlowProps {
   slices: HiddenStateSlice[];
@@ -19,6 +20,7 @@ function HiddenStateFlowInner({
   maxLayers = 24,
   cinematic = false,
 }: HiddenStateFlowProps) {
+  const { isBeginner } = useLearningDepth(); // CHANGED: Destructured isBeginner from hook
   const layerCount = slices[0]?.layerMagnitudes.length ?? maxLayers;
 
   const paths = useMemo(() => {
@@ -83,12 +85,14 @@ function HiddenStateFlowInner({
           );
         })}
       </svg>
-      <div className="mt-2 flex justify-between font-mono text-[9px] text-slate-600">
-        <span>Layer 0</span>
-        <span className="text-[var(--accent)]">Inspect L{inspectedLayer + 1}</span>
-        <span>Layer {layerCount}</span>
-      </div>
-      {slices[selectedTokenIndex] && (
+      {!isBeginner && ( // CHANGED: Wrapped in isBeginner gate to hide advanced layer axis labels
+        <div className="mt-2 flex justify-between font-mono text-[9px] text-slate-600">
+          <span>Layer 0</span>
+          <span className="text-[var(--accent)]">Inspect L{inspectedLayer + 1}</span>
+          <span>Layer {layerCount}</span>
+        </div>
+      )}
+      {slices[selectedTokenIndex] && !isBeginner && ( // CHANGED: Wrapped in isBeginner gate to hide trajectory description per audit finding
         <p className="mt-1 font-mono text-[10px] text-slate-400">
           Token &quot;{slices[selectedTokenIndex].text}&quot; — representation trajectory across depth
         </p>
