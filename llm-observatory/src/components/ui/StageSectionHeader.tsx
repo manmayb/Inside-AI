@@ -12,15 +12,39 @@ const STAGE_INDEX = Object.fromEntries(
 interface StageSectionHeaderProps {
   stage: PipelineStage;
   icon: LucideIcon;
+  /** drawer = inside details sheet (no duplicate chapter title) */
+  variant?: "section" | "drawer";
   children?: React.ReactNode;
 }
 
-export function StageSectionHeader({ stage, icon: Icon, children }: StageSectionHeaderProps) {
+export function StageSectionHeader({
+  stage,
+  icon: Icon,
+  variant = "drawer",
+  children,
+}: StageSectionHeaderProps) {
   const meta = STAGE_META[stage];
   const step = STAGE_INDEX[stage];
   const { isBeginner, showTechnical } = useLearningDepth();
 
   if (isBeginner) return null;
+
+  if (variant === "drawer") {
+    return (
+      <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-glow)]">
+            <Icon className="h-4 w-4 text-[var(--accent)]" strokeWidth={1.5} />
+          </div>
+          <p className="text-sm text-[var(--muted)]">
+            Chapter {step} · {meta.short}
+            {showTechnical && ` · ${meta.label}`}
+          </p>
+        </div>
+        {children && <div className="flex flex-wrap gap-2">{children}</div>}
+      </header>
+    );
+  }
 
   return (
     <header className="mb-6 flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between">

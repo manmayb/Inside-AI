@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { BookOpen } from "lucide-react";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { MetricCard } from "@/components/ui/MetricCard";
+import { StageLayout } from "@/components/ui/StageLayout";
+import { StageSectionHeader } from "@/components/ui/StageSectionHeader";
 import { usePipelineStore } from "@/store/pipelineStore";
 
 export function ContextSection() {
@@ -14,57 +17,63 @@ export function ContextSection() {
   const saturation = (usedTokens / config.contextWindow) * 100;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <header>
-        <h2 className="text-2xl font-semibold text-white">Context Window Assembly</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          System · memory · history · user · RAG → unified sequence
-        </p>
-      </header>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Context budget" value={String(config.contextWindow)} unit="tokens" />
-        <MetricCard label="Used" value={String(usedTokens)} unit="tokens" />
-        <MetricCard label="Saturation" value={saturation.toFixed(1)} unit="%" />
-      </div>
-
-      <GlassPanel title="Context compression" glow="accent">
-        <div className="relative h-12 overflow-hidden rounded-lg bg-black/40">
-          {contextBlocks.map((block, i) => {
-            const width = (block.tokens / usedTokens) * 100;
-            return (
-              <motion.div
+    <StageLayout
+      insight="The AI bundles instructions, past chat, and your question into one working memory."
+      focal={
+        <GlassPanel variant="hero" glow="accent" divider={false} className="min-h-[240px]"> {/* CHANGED: Added min-h-[240px] to preserve vertical sizing limits */}
+          <div className="relative h-16 overflow-hidden rounded-lg bg-[var(--elevated)]"> {/* CHANGED: Expanded height to h-16 for readability */}
+            {contextBlocks.map((block, i) => {
+              const width = (block.tokens / usedTokens) * 100;
+              return (
+                <motion.div
+                  key={block.id}
+                  className="absolute top-0 h-full border-r border-[var(--void)]/50 flex flex-col justify-center px-2 overflow-hidden" // CHANGED: Embedded segment labels inside context bars
+                  style={{
+                    left: `${contextBlocks.slice(0, i).reduce((a, b) => a + (b.tokens / usedTokens) * 100, 0)}%`,
+                    width: `${width}%`,
+                    backgroundColor: block.color + "55",
+                    transformOrigin: "left center",
+                  }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: stageProgress > 30 ? 1 : 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <span className="truncate text-[9px] font-semibold uppercase tracking-wider text-[var(--text)]">
+                    {block.label}
+                  </span>
+                  <span className="text-[8px] text-[var(--muted)]">
+                    {block.tokens}T
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
+          <div className="mt-4 space-y-2">
+            {contextBlocks.map((block) => (
+              <div
                 key={block.id}
-                className="absolute top-0 h-full border-r border-black/50"
-                style={{
-                  left: `${contextBlocks.slice(0, i).reduce((a, b) => a + (b.tokens / usedTokens) * 100, 0)}%`,
-                  width: `${width}%`,
-                  backgroundColor: block.color + "40",
-                  borderColor: block.color,
-                }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: stageProgress > 30 ? 1 : 0 }}
-                transition={{ delay: i * 0.1 }}
-              />
-            );
-          })}
-        </div>
-        <div className="mt-4 grid gap-2">
-          {contextBlocks.map((block) => (
-            <div
-              key={block.id}
-              className="flex items-start gap-3 rounded-lg border border-white/5 p-3"
-              style={{ borderLeftColor: block.color, borderLeftWidth: 3 }}
-            >
-              <div className="flex-1">
-                <p className="font-mono text-xs text-slate-400">{block.label}</p>
-                <p className="mt-1 text-sm text-slate-300 line-clamp-2">{block.content}</p>
+                className="flex items-start gap-3 rounded-lg border border-[var(--panel-border)] p-3"
+                style={{ borderLeftColor: block.color, borderLeftWidth: 3 }}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-[var(--accent)]">{block.label}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-[var(--muted)]">{block.content}</p>
+                </div>
               </div>
-              <span className="font-mono text-xs text-cyan-400">{block.tokens} tok</span>
-            </div>
-          ))}
-        </div>
-      </GlassPanel>
-    </div>
+            ))}
+          </div>
+        </GlassPanel>
+      }
+      curious={
+        <>
+          <StageSectionHeader stage="context" icon={BookOpen} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <MetricCard label="Context budget" value={String(config.contextWindow)} unit="tokens" />
+            <MetricCard label="Used" value={String(usedTokens)} unit="tokens" />
+            <MetricCard label="Saturation" value={saturation.toFixed(1)} unit="%" />
+          </div>
+        </>
+      }
+    />
   );
 }

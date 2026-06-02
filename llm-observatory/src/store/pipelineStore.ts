@@ -20,6 +20,7 @@ import {
   simulateResponse,
 } from "@/lib/inference";
 import { applyThemeAccent, loadPrefs, savePrefs } from "@/lib/persistence";
+import { stageEnterPatches } from "@/lib/stageEffects";
 import { tokenize } from "@/lib/tokenizer";
 import type {
   AttentionMatrix,
@@ -262,11 +263,13 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   setStage: (currentStage, progress = 0) => {
     const gp = globalProgress(currentStage, progress);
+    const enter = stageEnterPatches(currentStage);
     set({
       currentStage,
       stageProgress: progress,
       stageStatuses: buildStageStatuses(currentStage, progress),
       globalScrubProgress: gp,
+      ...(enter ?? {}),
     });
   },
 
@@ -303,19 +306,21 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     const currentIdx = PIPELINE_STAGES.indexOf(get().currentStage);
     const progress = idx <= currentIdx ? 100 : 0;
     const gp = globalProgress(stage, progress);
+    const enter = stageEnterPatches(stage);
     set({
       currentStage: stage,
       stageProgress: progress,
       stageStatuses: buildStageStatuses(stage, progress),
       globalScrubProgress: gp,
       isPaused: true,
+      ...(enter ?? {}),
     });
   },
 
   goToNextStage: () => {
-    const { currentStage, generationComplete } = get();
+    const { currentStage, generationComplete, ragEnabled } = get();
     if (generationComplete) return;
-    const next = getNextStage(currentStage);
+    const next = getNextStage(currentStage, ragEnabled);
     if (!next) {
       const state = get();
       const latencyMs = Date.now() - tourStartedAt;
@@ -334,20 +339,24 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       get().recordTourKeyframe();
       return;
     }
+    const enter = stageEnterPatches(next);
     set({
       currentStage: next,
       stageProgress: 0,
       stageStatuses: buildStageStatuses(next, 0),
       globalScrubProgress: globalProgress(next, 0),
       isPaused: false,
+      ...(enter ?? {}),
     });
     get().recordTourKeyframe();
   },
 
   goToPrevStage: () => {
-    const idx = PIPELINE_STAGES.indexOf(get().currentStage);
+    const { currentStage, ragEnabled } = get();
+    const stages = getActiveStages(ragEnabled);
+    const idx = stages.indexOf(currentStage);
     if (idx <= 0) return;
-    const prev = PIPELINE_STAGES[idx - 1];
+    const prev = stages[idx - 1];
     set({
       currentStage: prev,
       stageProgress: 100,
@@ -413,9 +422,16 @@ export function getStageDuration(stage: PipelineStage): number {
   return STAGE_META[stage].durationMs;
 }
 
-export function getNextStage(stage: PipelineStage): PipelineStage | null {
-  const i = PIPELINE_STAGES.indexOf(stage);
-  return i < PIPELINE_STAGES.length - 1 ? PIPELINE_STAGES[i + 1] : null;
+/** Stages included in the current journey (RAG optional). */
+export function getActiveStages(ragEnabled: boolean): PipelineStage[] {
+  return ragEnabled ? [...PIPELINE_STAGES] : PIPELINE_STAGES.filter((s) => s !== "rag");
+}
+
+export function getNextStage(stage: PipelineStage, ragEnabled?: boolean): PipelineStage | null {
+  const includeRag = ragEnabled ?? usePipelineStore.getState().ragEnabled;
+  const stages = getActiveStages(includeRag);
+  const i = stages.indexOf(stage);
+  return i >= 0 && i < stages.length - 1 ? stages[i + 1]! : null;
 }
 
 export function selectGlobalProgress(s: PipelineState): number {

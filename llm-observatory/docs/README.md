@@ -44,7 +44,7 @@ docs/
 ├── DECISIONS/                Architecture Decision Records (ADRs)
 ├── ROADMAP/                  Planned work & technical debt
 ├── CONTRIBUTING/             Setup, conventions, maintenance
-├── AI/                       Guide for Cursor / AI assistants
+├── AI/                       Contributor guide + review pack for external AI
 └── REFERENCE/                Glossary, keyboard shortcuts, file map
 ```
 
@@ -71,6 +71,7 @@ Detailed content lives under **`docs/`**. Root files stay short so they do not d
 | Engineer (simulation) | SIMULATION_ENGINE → PIPELINE → STATE_MANAGEMENT |
 | Engineer (UI) | COMPONENTS → VISUAL_SYSTEM → STAGES |
 | AI coding assistant | [AI/contributor-guide.md](./AI/contributor-guide.md) first |
+| External AI review (Claude/GPT) | [AI/review-pack.md](./AI/review-pack.md) — full doc summary in one file |
 
 ---
 

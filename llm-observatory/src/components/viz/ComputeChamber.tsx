@@ -3,17 +3,24 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { NEURAL_TIMING } from "@/motion/neuralMotion";
+import { useMotionPreferences } from "@/hooks/useMotionPreferences"; // CHANGED: Imported useMotionPreferences
+import { useLearningDepth } from "@/hooks/useLearningDepth"; // CHANGED: Imported useLearningDepth
 
 interface ComputeChamberProps {
   stageProgress: number;
   gpuCount?: number;
+  cinematic?: boolean;
 }
 
-function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProps) {
+function ComputeChamberInner({ stageProgress, gpuCount = 8, cinematic = false }: ComputeChamberProps) {
+  const { repeat } = useMotionPreferences(); // CHANGED: Fetch repeat behavior
+  const { isBeginner } = useLearningDepth(); // CHANGED: Fetch learning depth state
   const phase = stageProgress / 100;
 
   return (
-    <div className="relative min-h-[220px] overflow-hidden">
+    <div
+      className={`relative overflow-hidden ${cinematic ? "flex h-full min-h-0 flex-col justify-center px-6 py-8 max-h-[min(60vh,640px)] mx-auto max-w-4xl" : "min-h-[220px]"}`} // CHANGED: Constrained container heights and centered visualization for better visual comfort
+    >
       <div
         className="absolute inset-0 opacity-50"
         style={{
@@ -22,7 +29,7 @@ function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProp
         }}
       />
 
-      <div className="relative grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className={`relative grid gap-3 ${cinematic ? "grid-cols-2 gap-4 md:grid-cols-4 md:gap-5" : "grid-cols-2 md:grid-cols-4"}`}>
         {Array.from({ length: gpuCount }).map((_, i) => {
           const load = 50 + ((stageProgress + i * 11) % 100) * 0.45;
           const corridor = i % 2 === 0;
@@ -37,12 +44,14 @@ function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProp
                     ? ["0 0 20px var(--accent-glow)", "0 0 40px var(--accent-glow)", "0 0 20px var(--accent-glow)"]
                     : "0 0 10px rgba(0,0,0,0.3)",
               }}
-              transition={{ duration: NEURAL_TIMING.signalPulse, repeat: Infinity, delay: i * 0.15 }}
+              transition={{ duration: NEURAL_TIMING.signalPulse, repeat, delay: i * 0.15 }} // CHANGED: Wired repeat to motion preferences
             >
-              <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-wider text-[var(--accent)]">
-                <span>{corridor ? "GEMM" : "Tensor"} {i}</span>
-                <span className="text-[var(--muted)]">{load.toFixed(0)}%</span>
-              </div>
+              {!isBeginner && ( // CHANGED: Gated technical tile header in beginner mode
+                <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-wider text-[var(--accent)]">
+                  <span>{corridor ? "GEMM" : "Tensor"} {i}</span>
+                  <span className="text-[var(--muted)]">{load.toFixed(0)}%</span>
+                </div>
+              )}
 
               <div className="mt-3 grid grid-cols-4 gap-0.5">
                 {Array.from({ length: 8 }).map((_, c) => (
@@ -56,7 +65,7 @@ function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProp
                     animate={{ opacity: [0.4, 1, 0.4] }}
                     transition={{
                       duration: 1.2,
-                      repeat: Infinity,
+                      repeat, // CHANGED: Wired repeat to motion preferences
                       delay: (c + i) * 0.05,
                     }}
                   />
@@ -66,16 +75,18 @@ function ComputeChamberInner({ stageProgress, gpuCount = 8 }: ComputeChamberProp
               <motion.div
                 className="mt-2 h-0.5 rounded-full bg-[var(--accent)]"
                 animate={{ width: [`${load * 0.6}%`, `${load}%`, `${load * 0.8}%`] }}
-                transition={{ duration: NEURAL_TIMING.tensorFlow, repeat: Infinity }}
+                transition={{ duration: NEURAL_TIMING.tensorFlow, repeat }} // CHANGED: Wired repeat to motion preferences
               />
             </motion.div>
           );
         })}
       </div>
 
-      <p className="relative mt-4 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
-        Parallel processing corridors · inferencing reactors
-      </p>
+      {!isBeginner && ( // CHANGED: Gated bottom technical label in beginner mode
+        <p className="relative mt-4 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-[var(--muted)]">
+          Parallel processing corridors · inferencing reactors
+        </p>
+      )}
     </div>
   );
 }

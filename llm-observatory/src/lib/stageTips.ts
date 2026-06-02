@@ -11,7 +11,7 @@ export const STAGE_TIPS: Record<PipelineStage, Record<ViewMode, StageTip>> = {
     beginner: {
       title: "Your message enters the mind",
       summary: "Think of this like a thought arriving—your words are on their way in.",
-      tryThis: "Watch the receiving region light up at the top of the brain.",
+      tryThis: "Watch the region chip above as your words arrive.",
     },
     engineer: {
       title: "Request sent to the model",
@@ -75,7 +75,7 @@ export const STAGE_TIPS: Record<PipelineStage, Record<ViewMode, StageTip>> = {
     beginner: {
       title: "Thinking deeper, layer by layer",
       summary: "Information flows through many layers—each pass refines what the model understands.",
-      tryThis: "Follow the bright path in the brain's center.",
+      tryThis: "Watch the towers light up layer by layer.",
     },
     engineer: {
       title: "Transformer layers",
@@ -107,7 +107,7 @@ export const STAGE_TIPS: Record<PipelineStage, Record<ViewMode, StageTip>> = {
     beginner: {
       title: "Thinking at incredible speed",
       summary: "Huge grids of math run in parallel—this is how modern AI answers so fast.",
-      tryThis: "Watch the brain's thinking region pulse—detail appears in Curious/Advanced modes.",
+      tryThis: "Watch the parallel cells pulse as work happens.",
     },
     engineer: {
       title: "Parallel computation",
@@ -170,7 +170,7 @@ export const STAGE_TIPS: Record<PipelineStage, Record<ViewMode, StageTip>> = {
     beginner: {
       title: "Remembering what it already figured out",
       summary: "The AI saves earlier work so it doesn't re-read the whole conversation every time.",
-      tryThis: "Memory region pulses in the brain diagram.",
+      tryThis: "Green slots in the grid are being reused.",
     },
     engineer: {
       title: "KV cache",
@@ -229,7 +229,7 @@ export const STAGE_TIPS: Record<PipelineStage, Record<ViewMode, StageTip>> = {
     beginner: {
       title: "The thought completes",
       summary: "A quick recap of how long it took and how much was processed—your journey through the brain.",
-      tryThis: "Reflect on which brain regions lit up along the way.",
+      tryThis: "Open the menu to switch depth and explore technical details.",
     },
     engineer: {
       title: "Run summary",
